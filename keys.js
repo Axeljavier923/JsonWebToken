@@ -1,0 +1,1 @@
+export const key = "clavesecreta2024";
