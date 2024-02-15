@@ -1,5 +1,6 @@
 // import bcrypt from 'bcrypt';
-import {Auth, getUserById } from '../model/model_user.js'
+import {getUserById, getAllUsers, getOneUser, EditOneUsers, 
+  RegisterOneUsers, DeleteOneUsers, LoginOneUsers } from '../model/model_user.js'
 import {hashPassword, comparePassword} from "../helper/hash.js";
 import {generateToken, verifyToken} from "../helper/jsonWebToken.js"
 
@@ -46,7 +47,7 @@ export const ctrlGetUserInfoByToken = async (req, res) => {
 export const ctrlLoginUser = async (req, res) => {
   const { correo, password } = req.body;
   try {
-    const user = await Auth.findOne({ where: { correo } });
+    const user = await LoginOneUsers(correo);
     if (user) {
       const passwordMatch = await comparePassword(password, user.password);
       if (passwordMatch) {
@@ -59,8 +60,6 @@ export const ctrlLoginUser = async (req, res) => {
       } else {
         res.status(401).json({ message: 'Credenciales incorrectas' });
       }
-    } else {
-      res.status(401).json({ message: 'Credenciales incorrectas' });
     }
   } catch (error) {
     console.error(error);
@@ -74,10 +73,7 @@ export const ctrlLoginUser = async (req, res) => {
     try {
       const hashedPassword = await hashPassword(password);
   
-      const newUser = await Auth.create({
-        correo,
-        password: hashedPassword,
-      });
+      const newUser = await RegisterOneUsers(correo, hashedPassword,);
   
       res.status(200).json({
         message: 'Usuario registrado exitosamente',
@@ -92,9 +88,8 @@ export const ctrlLoginUser = async (req, res) => {
 
   export const editUser = async (req, res) => {
     const { id } = req.params;
-  
     try {
-      const updateUser = await Auth.findByPk(id);
+      const updateUser = await EditOneUsers(id)
   
       if (!updateUser) {
         return res.status(404).json({ message: 'Usuario no encontrado' });
@@ -121,7 +116,7 @@ export const ctrlLoginUser = async (req, res) => {
 
   export const allUser=async(req, res)=>{
     try {
-      const listaUsuarios= await Auth.findAll();
+      const listaUsuarios= await getAllUsers();
     res.status(200).json({
       message:"Lista de usuarios logeados ",
       listaUsuarios
@@ -136,11 +131,7 @@ export const ctrlLoginUser = async (req, res) => {
   export const oneUser=async(req, res)=>{
     const {id}=req.params;
     try {
-      const unUsuario= await Auth.findOne({
-        where:{
-          id
-        }
-      });
+      const unUsuario= await getOneUser(id)
     res.status(200).json({
       message:"el usuario logeado: ",
       unUsuario
@@ -160,10 +151,12 @@ export const ctrlLoginUser = async (req, res) => {
                 message:"no se pudo encontrar el id"
             })
         }
-        const deleteClient=await Auth.findByPk(id)
+        const deleteClient=await DeleteOneUsers(id)
         await deleteClient.destroy({estado:true});
         return res.status(200).json({
-            message:"Se elimino correctamente el usuario"
+            message:"Se elimino correctamente el usuario:",
+            deleteClient
+
         })
     } catch (error) {
         return res.status(500).json({

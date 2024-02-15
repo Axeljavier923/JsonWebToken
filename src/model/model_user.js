@@ -41,3 +41,36 @@ export const getUserById = async (userId) => {
       throw error;
     }
   };
+
+  export const getAllUsers=async ()=>{
+    return await Auth.findAll() ?? null;
+  }
+
+  export const getOneUser = async (id) => {
+    return await Auth.findOne({
+      where: {
+        id
+      }
+    }) ?? null;
+  };
+
+  export const EditOneUsers=async (id)=>{
+    return await Auth.findByPk(id);;
+  }
+
+  export const DeleteOneUsers=async (id)=>{
+    return await Auth.findByPk(id)
+  }
+
+  export const RegisterOneUsers=async (correo, hashedPassword)=>{
+    return await Auth.create({
+        correo,
+        password: hashedPassword,
+      });
+  }
+
+  export const LoginOneUsers=async (correo)=>{
+    return await Auth.findOne({where:{correo}})
+  }
+
+
